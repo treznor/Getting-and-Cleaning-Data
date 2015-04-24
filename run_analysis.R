@@ -4,26 +4,35 @@
 # Project: Course Project
 # Author: Mike Felts
 # -------------------------------------------------
-library("dplyr")
+# If required packages are not present then install them.
+if("dplyr" %in% rownames(installed.packages()) == FALSE) {install.packages("dplyr")};library(dplyr)
+
+# If the dataset is not present in the current working directory then download it
+fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+if (!file.exists("data/UCI HAR Dataset")) {
+  if (!file.exists("data")) {
+    dir.create("data")
+  }
+  download.file(fileUrl, destfile="data/UCIHAR.zip")
+  unzip("data/UCIHAR.zip", exdir="data")
+}
+
 # -------------------------------------------------
 # Step 1: Merges the training and the test sets to create one data set.
 # -------------------------------------------------
 
-# Set the working directory
-setwd("c:\\users\\michael.j.felts\\documents\\coursera\\Data Science\\Getting and Cleaning Data\\data\\UCI HAR Dataset")
-
 # Load the train data tables
-train.subject=read.table("./train/subject_train.txt", col.names="subject")
-train.x=read.table("./train/x_train.txt")
-train.y=read.table("./train/y_train.txt", col.names="activity")
+train.subject=read.table("data/UCI HAR Dataset/train/subject_train.txt", col.names="subject")
+train.x=read.table("data/UCI HAR Dataset/train/x_train.txt")
+train.y=read.table("data/UCI HAR Dataset/train/y_train.txt", col.names="activity")
 
 # Make one large train matrix
 train <- cbind(train.subject, train.y, train.x)
 
 # Load the test data tables
-test.subject=read.table("./test/subject_test.txt", col.names="subject")
-test.x=read.table("./test/x_test.txt")
-test.y=read.table("./test/y_test.txt", col.names="activity")
+test.subject=read.table("data/UCI HAR Dataset/test/subject_test.txt", col.names="subject")
+test.x=read.table("data/UCI HAR Dataset/test/x_test.txt")
+test.y=read.table("data/UCI HAR Dataset/test/y_test.txt", col.names="activity")
 
 # Make one large test matrix
 test <- cbind(test.subject, test.y, test.x)
@@ -36,7 +45,7 @@ UCIdata <- rbind(test, train)
 # -------------------------------------------------
 
 # Load the names of features and create a filtered list of features
-features.full = read.table("features.txt", col.names=c("id","name"))
+features.full = read.table("data/UCI HAR Dataset/features.txt", col.names=c("id","name"))
 features.list <- c("subject","activity",as.vector(features.full$name))
 features <- grepl("mean|std|subject|activity",features.list) & !grepl("meanFreq", features.list)
 
@@ -48,7 +57,7 @@ UCIdata.filtered <- UCIdata[,features]
 # -------------------------------------------------
 
 # Load the names of activity labels
-activity.labels = read.table("activity_labels.txt", col.names=c("id","name"))
+activity.labels = read.table("data/UCI HAR Dataset/activity_labels.txt", col.names=c("id","name"))
 
 # Apply activity labels to the filtered data set using a replacement from the activity list using sapply
 UCIdata.filtered$activity <- sapply(UCIdata.filtered$activity, function(x) activity.labels[x,2])
